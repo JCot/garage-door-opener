@@ -5,10 +5,12 @@
  *      Author: jdc9622
  */
 
-#include "global.hpp"
+#include "global.h"
 
 bool isButtonPressed = false;
 bool isDoorClosed = true;
 bool isDoorOpen = false;
+bool isDoorOpening = false;
+bool isDoorClosing = false;
 bool isIRInterrupted = false;
 bool isMotorOvercurrent = false;

@@ -5,9 +5,9 @@
  *      Author: jdc9622
  */
 
-#include "Input.hpp"
+#include "Input.h"
 #include <iostream>
-#include "global.hpp"
+#include "global.h"
 
 using namespace std;
 
