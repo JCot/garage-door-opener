@@ -6,8 +6,10 @@
  */
 
 #include "Input.h"
-#include <iostream>
 #include "global.h"
+#include <iostream>
+#include <string>
+#include <pthread.h>
 
 using namespace std;
 
@@ -20,22 +22,31 @@ Input::~Input() {
 	// TODO Auto-generated destructor stub
 }
 
-void Input::processInput(){
+void* Input::processInput(){
 	while(true){
-		char input;
+		string input;
 		cout << "Please enter a command: ";
-		cin >> input;
+		getline(cin, input);
 
-		if(input == 'm'){
+		if(input == "m"){
+			pthread_mutex_lock(&mutex);
 			isMotorOvercurrent = true;
+			pthread_cond_wait(&done, &mutex);
+			pthread_mutex_unlock(&mutex);
 		}
 
-		else if(input == 'i'){
+		else if(input == "i"){
+			pthread_mutex_lock(&mutex);
 			isIRInterrupted = true;
+			pthread_cond_wait(&done, &mutex);
+			pthread_mutex_unlock(&mutex);
 		}
 
-		else if(input == 'r'){
+		else if(input == "r"){
+			pthread_mutex_lock(&mutex);
 			isButtonPressed = true;
+			pthread_cond_wait(&done, &mutex);
+			pthread_mutex_unlock(&mutex);
 		}
 
 		else{

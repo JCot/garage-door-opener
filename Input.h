@@ -12,7 +12,7 @@ class Input {
 public:
 	Input();
 	virtual ~Input();
-	void processInput();
+	void* processInput();
 };
 
 #endif /* INPUT_H_ */

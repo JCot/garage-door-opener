@@ -6,6 +6,7 @@
  */
 
 #include "global.h"
+#include <pthread.h>
 
 bool isButtonPressed = false;
 bool isDoorClosed = true;
@@ -14,3 +15,5 @@ bool isDoorOpening = false;
 bool isDoorClosing = false;
 bool isIRInterrupted = false;
 bool isMotorOvercurrent = false;
+pthread_mutex_t mutex;
+pthread_cond_t done;
