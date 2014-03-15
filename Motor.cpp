@@ -25,12 +25,14 @@ void Motor::openDoor(){
 	pthread_mutex_lock(&mutex);
 
 	//TODO: Open door stuff
-	cout << "I am opening the door.\n";
+	cout << "\nI am opening the door.\n";
+	cout.flush();
 	sleep(10);
 
 	pthread_cond_signal(&done);
 	doorClosed = false;
-	cout << "Door opened\n";
+	cout << "\nDoor opened\n";
+	cout.flush();
 	doorOpen = true;
 	pthread_mutex_unlock(&mutex);
 }

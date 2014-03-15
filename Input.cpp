@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include <pthread.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -56,5 +57,7 @@ void* Input::processInput(){
 		else{
 			cout << "Incorrect input.\n";
 		}
+
+		sleep(1);
 	}
 }
