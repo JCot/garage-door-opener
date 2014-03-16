@@ -16,8 +16,8 @@
 
 using namespace std;
 
-extern pthread_mutex_t mutex;
-extern pthread_cond_t done;
+extern pthread_mutex_t mutex; // mutex variable
+extern pthread_cond_t done; // condition variable
 
 Controller::Controller() {
 	// TODO Auto-generated constructor stub
@@ -53,18 +53,24 @@ void* scanInputSignals(void *param){
 int main(int argc, char *argv[]) {
 	Controller control;
 	Motor motor;
+	int rc;
 
 	pthread_t input;
 	pthread_t scanner;
+	
+	// To explicitly create a thread as joinable or detached, the attr argument 
+	// in the pthread_create() routine is used.
 	pthread_attr_t attr;
 
+	// Initialize mutex and condition variable objects.
 	pthread_mutex_init(&mutex, NULL);
 	pthread_cond_init(&done, NULL);
 
+	// Initialize and set thread detached attribute.
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-	int rc = pthread_create(&input, NULL, startInput, (void *)1);
+	rc = pthread_create(&input, NULL, startInput, (void *)1);
 	//pthread_create(&scanner, NULL, scanInputSignals, (void *)motor);
 
 	if(rc){
