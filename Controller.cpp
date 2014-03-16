@@ -3,20 +3,20 @@
  *
  *  Created on: Mar 10, 2014
  *      Author: Justin Cotner
+ * 				Jenny Zhen
  */
 
-#include "Controller.h"
-#include "global.h"
-#include "Input.h"
-#include "Motor.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <iostream>
 #include <time.h>
 #include <signal.h>
 #include <string>
+#include "Controller.h"
+#include "global.h"
+#include "Input.h"
+#include "Motor.h"
 
 using namespace std;
 
