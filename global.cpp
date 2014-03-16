@@ -7,13 +7,18 @@
 
 #include "global.h"
 #include <pthread.h>
+#include <queue>
 
-bool isButtonPressed = false;
-bool isDoorClosed = true;
-bool isDoorOpen = false;
-bool isDoorOpening = false;
-bool isDoorClosing = false;
-bool isIRInterrupted = false;
-bool isMotorOvercurrent = false;
+using namespace std;
+
+bool buttonPressed = false;
+bool doorClosed = true;
+bool doorOpen = false;
+bool motorUp = false;
+bool motorDown = false;
+bool irInterrupted = false;
+bool irBeamOn = false;
+bool motorOvercurrent = false;
 pthread_mutex_t mutex;
 pthread_cond_t done;
+queue <string> commands;

@@ -9,15 +9,20 @@
 #define GLOBAL_H_
 
 #include <pthread.h>
+#include <queue>
 
-extern bool isButtonPressed;
-extern bool isDoorClosed;
-extern bool isDoorOpen;
-extern bool isDoorOpening;
-extern bool isDoorClosing;
-extern bool isIRInterrupted;
-extern bool isMotorOvercurrent;
+using namespace std;
+
+extern bool buttonPressed;
+extern bool doorClosed;
+extern bool doorOpen;
+extern bool motorUp;
+extern bool motorDown;
+extern bool irInterrupted;
+extern bool irBeamOn;
+extern bool motorOvercurrent;
 extern pthread_mutex_t mutex;
 extern pthread_cond_t done;
+extern queue <string> commands;
 
 #endif /* GLOBAL_H_ */

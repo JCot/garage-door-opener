@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include <pthread.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -28,29 +29,35 @@ void* Input::processInput(){
 		cout << "Please enter a command: ";
 		getline(cin, input);
 
-		if(input == "m"){
-			pthread_mutex_lock(&mutex);
-			isMotorOvercurrent = true;
-			pthread_cond_wait(&done, &mutex);
-			pthread_mutex_unlock(&mutex);
-		}
+//		if(input == "m"){
+//			pthread_mutex_lock(&mutex);
+//			motorOvercurrent = true;
+//			pthread_cond_wait(&done, &mutex);
+//			pthread_mutex_unlock(&mutex);
+//		}
+//
+//		else if(input == "i"){
+//			pthread_mutex_lock(&mutex);
+//			irInterrupted = true;
+//			pthread_cond_wait(&done, &mutex);
+//			pthread_mutex_unlock(&mutex);
+//		}
+//
+//		else if(input == "r"){
+//			pthread_mutex_lock(&mutex);
+//			buttonPressed = true;
+//			pthread_cond_wait(&done, &mutex);
+//			pthread_mutex_unlock(&mutex);
+//		}
 
-		else if(input == "i"){
-			pthread_mutex_lock(&mutex);
-			isIRInterrupted = true;
-			pthread_cond_wait(&done, &mutex);
-			pthread_mutex_unlock(&mutex);
-		}
-
-		else if(input == "r"){
-			pthread_mutex_lock(&mutex);
-			isButtonPressed = true;
-			pthread_cond_wait(&done, &mutex);
-			pthread_mutex_unlock(&mutex);
+		if(input == "m" || input == "i" || input == "r"){
+			commands.push(input);
 		}
 
 		else{
 			cout << "Incorrect input.\n";
 		}
+
+		sleep(1);
 	}
 }
