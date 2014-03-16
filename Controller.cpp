@@ -15,6 +15,7 @@
 #include <pthread.h>
 #include <iostream>
 #include <time.h>
+#include <signal.h>
 #include <string>
 
 using namespace std;
@@ -51,8 +52,10 @@ void* scanInputSignals(void *param){
 			}
 
 			else if(comm == "i"){
-				irInterrupted = true;
-				pthread_mutex_unlock(&mutex);
+				if(irBeamOn){
+					irInterrupted = true;
+					pthread_mutex_unlock(&mutex);
+				}
 			}
 
 			else if(comm == "r"){
@@ -70,10 +73,12 @@ void* scanInputSignals(void *param){
 
 				else if(doorOpen){
 					motorDown = true;
+					irBeamOn = true;
 					pthread_mutex_unlock(&mutex);
 					motor->closeDoor();
 					pthread_mutex_lock(&mutex);
 					motorDown = false;
+					irBeamOn = false;
 					pthread_mutex_unlock(&mutex);
 				}
 
