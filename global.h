@@ -2,7 +2,7 @@
  * global.h
  *
  *  Created on: Mar 10, 2014
- *      Author: jdc9622
+ *      Author: jdc9622, jxz6853
  */
 
 #ifndef GLOBAL_H_
@@ -10,6 +10,7 @@
 
 #include <pthread.h>
 #include <queue>
+#include <string>
 
 using namespace std;
 

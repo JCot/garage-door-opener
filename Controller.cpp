@@ -3,19 +3,19 @@
  *
  *  Created on: Mar 10, 2014
  *      Author: Justin Cotner
+ * 				Jenny Zhen
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <iostream>
+#include <time.h>
 #include "Controller.h"
 #include "global.h"
 #include "Input.h"
 #include "Motor.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <iostream>
-#include <time.h>
-#include <string>
+
 
 using namespace std;
 
