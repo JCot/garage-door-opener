@@ -57,7 +57,5 @@ void* Input::processInput(){
 		else{
 			cout << "Incorrect input.\n";
 		}
-
-		sleep(1);
 	}
 }
