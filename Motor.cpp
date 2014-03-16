@@ -9,11 +9,20 @@
 #include "global.h"
 #include <iostream>
 #include <unistd.h>
+#include <time.h>
+#include <signal.h>
 
 using namespace std;
 
+static void sigintHandler(int sig){
+	return;
+}
+
 Motor::Motor() {
 	// TODO Auto-generated constructor stub
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigintHandler;
 
 }
 
@@ -24,10 +33,15 @@ Motor::~Motor() {
 void Motor::openDoor(){
 	pthread_mutex_lock(&mutex);
 
+	struct timespec tim;
+	tim.tv_sec = 10;
+	tim.tv_nsec = 0;
+
 	//TODO: Open door stuff
 	cout << "\nI am opening the door.\n";
 	cout.flush();
-	sleep(10);
+//	sleep(10);
+	nanosleep(&tim, NULL);
 
 	pthread_cond_signal(&done);
 	doorClosed = false;
@@ -41,12 +55,12 @@ void Motor::closeDoor(){
 	pthread_mutex_lock(&mutex);
 
 	//TODO: Close door stuff
-	cout << "I am closing the door.\n";
+	cout << "\nI am closing the door.\n";
 	sleep(10);
 
 	pthread_cond_signal(&done);
 	doorOpen = false;
-	cout << "Door closed\n";
+	cout << "\nDoor closed\n";
 	doorClosed = true;
 	pthread_mutex_unlock(&mutex);
 }
@@ -55,9 +69,9 @@ void Motor::stopDoor(){
 	pthread_mutex_lock(&mutex);
 
 	//TODO: Stop door stuff
-	cout << "I am stopping the door.\n";
+	cout << "\nI am stopping the door.\n";
 
 	pthread_cond_signal(&done);
-	cout << "Door stopped\n";
+	cout << "\nDoor stopped\n";
 	pthread_mutex_unlock(&mutex);
 }

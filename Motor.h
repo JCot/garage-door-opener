@@ -8,6 +8,8 @@
 #ifndef MOTOR_H_
 #define MOTOR_H_
 
+#include <signal.h>
+
 class Motor {
 public:
 	Motor();
@@ -15,6 +17,7 @@ public:
 	void openDoor();
 	void closeDoor();
 	void stopDoor();
+	struct sigaction sa;
 };
 
 #endif /* MOTOR_H_ */

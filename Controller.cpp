@@ -11,11 +11,12 @@
 #include <unistd.h>
 #include <iostream>
 #include <time.h>
+#include <signal.h>
+#include <string>
 #include "Controller.h"
 #include "global.h"
 #include "Input.h"
 #include "Motor.h"
-
 
 using namespace std;
 
@@ -54,10 +55,12 @@ void* scanInputSignals(void *param){
 			}
 
 			else if(comm == "i"){
-				irInterrupted = true;
-				cout << "Infrared beam interruption.\n";
-				
-				pthread_mutex_unlock(&mutex);
+				if(irBeamOn){
+					irInterrupted = true;
+					cout << "Infrared beam interruption.\n";
+					
+					pthread_mutex_unlock(&mutex);
+				}
 			}
 
 			else if(comm == "r"){
@@ -75,15 +78,18 @@ void* scanInputSignals(void *param){
 
 				else if(doorOpen){
 					motorDown = true;
+					irBeamOn = true;
 					pthread_mutex_unlock(&mutex);
 					motor->closeDoor();
 					pthread_mutex_lock(&mutex);
 					motorDown = false;
+					irBeamOn = false;
 					pthread_mutex_unlock(&mutex);
 				}
 
 				else{
 					pthread_mutex_unlock(&mutex);
+					pthread_kill(motor, 7);
 					motor->stopDoor();
 				}
 
