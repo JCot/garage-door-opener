@@ -137,6 +137,13 @@ void* startMotor(void *param){
 int main(int argc, char *argv[]) {
 	Controller control;
 	Motor *motor = new Motor();
+<<<<<<< HEAD
+=======
+
+	pthread_t input;
+	pthread_t scanner;
+	pthread_t motor;
+>>>>>>> 2add8955348e3d4d7bdc9043d16477aa5a26f7e2
 	
 	// To explicitly create a thread as joinable or detached, the attr argument 
 	// in the pthread_create() routine is used.
@@ -150,6 +157,9 @@ int main(int argc, char *argv[]) {
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
+	/* The first thread just takes the input from the keyboard and throws it on 
+	a queue of commands if it is valid input.
+	The second thread goes through the queue executing commands. */
 	pthread_create(&input, NULL, startInput, (void *)1);
 	pthread_create(&scanner, NULL, startScanner, (void *)motor);
 	pthread_create(&motorThread, NULL, NULL, NULL);
