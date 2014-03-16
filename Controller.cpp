@@ -47,11 +47,16 @@ void* scanInputSignals(void *param){
 
 			if(comm == "m"){
 				motorOvercurrent = true;
+				cout << "Motor overcurrent detected.\n";
+				
+				// Always unlock mutex after everything is completed.
 				pthread_mutex_unlock(&mutex);
 			}
 
 			else if(comm == "i"){
 				irInterrupted = true;
+				cout << "Infrared beam interruption.\n";
+				
 				pthread_mutex_unlock(&mutex);
 			}
 
@@ -130,6 +135,7 @@ int main(int argc, char *argv[]) {
 
 	pthread_t input;
 	pthread_t scanner;
+	pthread_t motor;
 	
 	// To explicitly create a thread as joinable or detached, the attr argument 
 	// in the pthread_create() routine is used.
@@ -143,6 +149,9 @@ int main(int argc, char *argv[]) {
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
+	/* The first thread just takes the input from the keyboard and throws it on 
+	a queue of commands if it is valid input.
+	The second thread goes through the queue executing commands. */
 	pthread_create(&input, NULL, startInput, (void *)1);
 	pthread_create(&scanner, NULL, startScanner, (void *)motor);
 

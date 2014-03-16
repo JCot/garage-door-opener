@@ -50,6 +50,7 @@ void* Input::processInput(){
 //			pthread_mutex_unlock(&mutex);
 //		}
 
+		// push a string representing the command in a queue.
 		if(input == "m" || input == "i" || input == "r"){
 			commands.push(input);
 		}
