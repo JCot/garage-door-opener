@@ -14,17 +14,20 @@
 
 using namespace std;
 
+static void sigintHandler(int sig){
+	return;
+}
+
 Motor::Motor() {
 	// TODO Auto-generated constructor stub
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigintHandler;
 
 }
 
 Motor::~Motor() {
 	// TODO Auto-generated destructor stub
-}
-
-static void sigintHandler(int sig){
-	return;
 }
 
 void Motor::openDoor(){

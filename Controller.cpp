@@ -84,6 +84,7 @@ void* scanInputSignals(void *param){
 
 				else{
 					pthread_mutex_unlock(&mutex);
+					pthread_kill(motor, 7);
 					motor->stopDoor();
 				}
 
