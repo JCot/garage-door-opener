@@ -14,10 +14,23 @@
 
 using namespace std;
 
-extern struct signals;
+typedef struct{
+	bool buttonPressed;
+	bool doorClosed;
+	bool doorOpen;
+	bool motorUp;
+	bool motorDown;
+	bool irInterrupted;
+	bool irBeamOn;
+	bool motorOvercurrent;
+}SIGNALS;
 
-extern pthread_mutex_t mutex;
+extern SIGNALS signals;
+extern pthread_mutex_t signals_mutex;
 extern pthread_cond_t done;
+extern pthread_t input;
+extern pthread_t scanner;
+extern pthread_t motorThread;
 extern queue <string> commands;
 
 #endif /* GLOBAL_H_ */

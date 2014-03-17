@@ -6,17 +6,17 @@
  * 				Jenny Zhen
  */
 
+#include "Controller.h"
+#include "global.h"
+#include "Input.h"
+#include "Motor.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
 #include <time.h>
 #include <signal.h>
-#include <string>
-#include "Controller.h"
-#include "global.h"
-#include "Input.h"
-#include "Motor.h"
+
 
 using namespace std;
 
@@ -67,7 +67,7 @@ void* scanInputSignals(void *param){
 				pthread_mutex_unlock(&signals_mutex);
 				motor->openDoor();
 				sleep(2);
-				kill(scanner, SIGUSR1);
+				pthread_kill(scanner, SIGUSR1);
 				pthread_mutex_lock(&signals_mutex);
 				signals.motorUp = false;
 			}
@@ -85,7 +85,7 @@ void* scanInputSignals(void *param){
 			else{
 				signals.motorDown = false;
 				signals.motorUp = false;
-				pthread_kill(motorThread, SIGUSR1);
+				pthread_kill(scanner, SIGUSR1);
 				motor->stopDoor();
 			}
 
@@ -102,25 +102,19 @@ void* startScanner(void *param){
 	}
 }
 
-void* startMotor(void *param){
-	Motor* motor = (Motor*)param;
-	while(true){}
-}
-
-int main(int argc, char *argv[]) {
-	Controller control;
+void Controller::run(){
 	Motor *motor = new Motor();
 
 	pthread_t input;
 	pthread_t scanner;
-	pthread_t motor;
-	
+	pthread_t motorThread;
+
 	// To explicitly create a thread as joinable or detached, the attr argument 
 	// in the pthread_create() routine is used.
 	pthread_attr_t attr;
 
 	// Initialize mutex and condition variable objects.
-	pthread_mutex_init(&mutex, NULL);
+	pthread_mutex_init(&signals_mutex, NULL);
 	pthread_cond_init(&done, NULL);
 
 	// Initialize and set thread detached attribute.
@@ -128,6 +122,42 @@ int main(int argc, char *argv[]) {
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
 	/* The first thread just takes the input from the keyboard and throws it on 
+		a queue of commands if it is valid input.
+		The second thread goes through the queue executing commands. */
+	pthread_create(&input, NULL, startInput, (void *)1);
+	pthread_create(&scanner, NULL, startScanner, (void *)motor);
+//	pthread_create(&motorThread, NULL, NULL, NULL);
+
+	pthread_join(input, NULL);
+	pthread_join(scanner, NULL);
+//	pthread_join(motorThread, NULL);
+
+	//input.processInput();
+}
+
+int main(int argc, char *argv[]) {
+	Controller control;
+
+//	control.run();
+	Motor *motor = new Motor();
+
+	pthread_t input;
+	pthread_t scanner;
+	pthread_t motorThread;
+
+	// To explicitly create a thread as joinable or detached, the attr argument
+	// in the pthread_create() routine is used.
+	pthread_attr_t attr;
+
+	// Initialize mutex and condition variable objects.
+	pthread_mutex_init(&signals_mutex, NULL);
+	pthread_cond_init(&done, NULL);
+
+	// Initialize and set thread detached attribute.
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+	/* The first thread just takes the input from the keyboard and throws it on
 	a queue of commands if it is valid input.
 	The second thread goes through the queue executing commands. */
 	pthread_create(&input, NULL, startInput, (void *)1);

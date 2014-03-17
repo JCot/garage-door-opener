@@ -39,7 +39,7 @@ void Motor::openDoor(){
 	tim.tv_nsec = 0;
 
 	//TODO: Open door stuff
-	cout << "\nI am opening the fucking door.\n";
+	cout << "\nI am opening the door.\n";
 	cout.flush();
 	signals.doorClosed = false;
 
@@ -68,7 +68,7 @@ void Motor::closeDoor(){
 	signals.doorOpen = false;
 
 	pthread_mutex_unlock(&signals_mutex);
-	if(nanosleep(tim, NULL) == -1){
+	if(nanosleep(&tim, NULL) == -1){
 		return;
 	}
 

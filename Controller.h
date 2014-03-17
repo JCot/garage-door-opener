@@ -8,18 +8,14 @@
 #ifndef CONTROLLER_H_
 #define CONTROLLER_H_
 
-#include <pthread>
+#include <pthread.h>
 
 class Controller {
 
 public:
 	Controller();
 	virtual ~Controller();
-
-private:
-	pthread_t input;
-	pthread_t scanner;
-	pthread_t motorThread;
+	void run();
 };
 
 #endif /* CONTROLLER_H_ */

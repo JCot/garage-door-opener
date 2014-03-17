@@ -11,17 +11,11 @@
 
 using namespace std;
 
-typedef struct{
-	bool buttonPressed = false;
-	bool doorClosed = true;
-	bool doorOpen = false;
-	bool motorUp = false;
-	bool motorDown = false;
-	bool irInterruped = false;
-	bool irBeamOn = false;
-	bool motorOvercurrent = false;
-}signals;
+SIGNALS signals;
 
 pthread_mutex_t signals_mutex;
 pthread_cond_t done;
+pthread_t input;
+pthread_t scanner;
+pthread_t motorThread;
 queue <string> commands;
