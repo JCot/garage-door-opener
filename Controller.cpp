@@ -19,8 +19,8 @@
 
 using namespace std;
 
-extern pthread_mutex_t mutex;
-extern pthread_cond_t done;
+//extern pthread_mutex_t signals_mutex;
+//extern pthread_cond_t done;
 
 Controller::Controller() {
 	// TODO Auto-generated constructor stub
@@ -41,80 +41,51 @@ void* scanInputSignals(void *param){
 
 	while(true){
 		if(!commands.empty()){
-			pthread_mutex_lock(&mutex);
+			pthread_mutex_lock(&signals_mutex);
 			string comm = commands.front();
 			commands.pop();
 
 			if(comm == "m"){
-				motorOvercurrent = true;
-				pthread_mutex_unlock(&mutex);
+				signals.motorOvercurrent = true;
+				pthread_mutex_unlock(&signals_mutex);
 			}
 
 			else if(comm == "i"){
-				irInterrupted = true;
-				pthread_mutex_unlock(&mutex);
+				signals.irInterrupted = true;
+				pthread_mutex_unlock(&signals_mutex);
 			}
 
 			else if(comm == "r"){
-				buttonPressed = true;
+				signals.buttonPressed = true;
 				sleep(1);
 
-				if(doorClosed){
-					motorUp = true;
-					pthread_mutex_unlock(&mutex);
+				if(signals.doorClosed){
+					signals.motorUp = true;
+					pthread_mutex_unlock(&signals_mutex);
 					motor->openDoor();
-					pthread_mutex_lock(&mutex);
-					motorUp = false;
-					pthread_mutex_unlock(&mutex);
+					pthread_mutex_lock(&signals_mutex);
+					signals.motorUp = false;
+					pthread_mutex_unlock(&signals_mutex);
 				}
 
-				else if(doorOpen){
-					motorDown = true;
-					pthread_mutex_unlock(&mutex);
+				else if(signals.doorOpen){
+					signals.motorDown = true;
+					pthread_mutex_unlock(&signals_mutex);
 					motor->closeDoor();
-					pthread_mutex_lock(&mutex);
-					motorDown = false;
-					pthread_mutex_unlock(&mutex);
+					pthread_mutex_lock(&signals_mutex);
+					signals.motorDown = false;
+					pthread_mutex_unlock(&signals_mutex);
 				}
 
 				else{
-					pthread_mutex_unlock(&mutex);
+					pthread_mutex_unlock(&signals_mutex);
 					motor->stopDoor();
 				}
 
-				buttonPressed = false;
+				signals.buttonPressed = false;
 			}
 		}
 	}
-
-//	pthread_mutex_lock(&mutex);
-
-//	if(buttonPressed){
-//		if(doorClosed){
-//			motorUp = true;
-//			pthread_mutex_unlock(&mutex);
-//			motor->openDoor();
-//			pthread_mutex_lock(&mutex);
-//			motorUp = false;
-//			pthread_mutex_unlock(&mutex);
-//		}
-//
-//		if(doorOpen){
-//			motorDown = true;
-//			pthread_mutex_unlock(&mutex);
-//			motor->closeDoor();
-//			pthread_mutex_lock(&mutex);
-//			motorDown = false;
-//			pthread_mutex_unlock(&mutex);
-//		}
-//
-//		else{
-//			pthread_mutex_unlock(&mutex);
-//			motor->stopDoor();
-//		}
-//
-//		buttonPressed = false;
-//	}
 }
 
 void * startScanner(void *param){
@@ -132,7 +103,7 @@ int main(int argc, char *argv[]) {
 	pthread_t scanner;
 	pthread_attr_t attr;
 
-	pthread_mutex_init(&mutex, NULL);
+	pthread_mutex_init(&signals_mutex, NULL);
 	pthread_cond_init(&done, NULL);
 
 	pthread_attr_init(&attr);

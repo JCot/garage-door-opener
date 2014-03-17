@@ -9,6 +9,7 @@
 #include "global.h"
 #include <iostream>
 #include <unistd.h>
+#include <time.h>
 
 using namespace std;
 
@@ -22,42 +23,55 @@ Motor::~Motor() {
 }
 
 void Motor::openDoor(){
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&signals_mutex);
+
+	struct timespec tim;
+	tim.tv_sec = 10;
+	tim.tv_nsec = 0;
 
 	//TODO: Open door stuff
 	cout << "\nI am opening the door.\n";
 	cout.flush();
-	sleep(10);
+	if(nanosleep(&tim, NULL) == -1){
+		return;
+	}
 
-	pthread_cond_signal(&done);
-	doorClosed = false;
+	signals.doorClosed = false;
 	cout << "\nDoor opened\n";
 	cout.flush();
-	doorOpen = true;
-	pthread_mutex_unlock(&mutex);
+	signals.doorOpen = true;
+	pthread_mutex_unlock(&signals_mutex);
 }
 
 void Motor::closeDoor(){
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&signals_mutex);
+
+	struct timespec tim;
+	tim.tv_sec = 10;
+	tim.tv_nsec = 0;
 
 	//TODO: Close door stuff
-	cout << "I am closing the door.\n";
-	sleep(10);
+	cout << "\nI am closing the door.\n";
+	cout.flush();
+	if(nanosleep(&tim, NULL) == -1){
+		return;
+	}
 
-	pthread_cond_signal(&done);
-	doorOpen = false;
-	cout << "Door closed\n";
-	doorClosed = true;
-	pthread_mutex_unlock(&mutex);
+	signals.doorOpen = false;
+	cout << "\nDoor closed\n";
+	cout.flush();
+	signals.doorClosed = true;
+	pthread_mutex_unlock(&signals_mutex);
 }
 
 void Motor::stopDoor(){
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&signals_mutex);
 
 	//TODO: Stop door stuff
-	cout << "I am stopping the door.\n";
+	cout << "\nI am stopping the door.\n";
+	cout.flush();
 
-	pthread_cond_signal(&done);
-	cout << "Door stopped\n";
-	pthread_mutex_unlock(&mutex);
+	cout << "\nDoor stopped\n";
+	cout.flush();
+	pthread_mutex_unlock(&signals_mutex);
 }

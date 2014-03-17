@@ -13,15 +13,19 @@
 
 using namespace std;
 
-extern bool buttonPressed;
-extern bool doorClosed;
-extern bool doorOpen;
-extern bool motorUp;
-extern bool motorDown;
-extern bool irInterrupted;
-extern bool irBeamOn;
-extern bool motorOvercurrent;
-extern pthread_mutex_t mutex;
+typedef struct{
+	bool buttonPressed;
+	bool doorClosed;
+	bool doorOpen;
+	bool motorUp;
+	bool motorDown;
+	bool irInterrupted;
+	bool irBeamOn;
+	bool motorOvercurrent;
+}SIGNALS;
+
+extern SIGNALS signals;
+extern pthread_mutex_t signals_mutex;
 extern pthread_cond_t done;
 extern queue <string> commands;
 
