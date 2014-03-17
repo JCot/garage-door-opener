@@ -27,6 +27,7 @@ void* Input::processInput(){
 	while(true){
 		string input;
 		cout << "Please enter a command: ";
+		cout.flush();
 		getline(cin, input);
 
 //		if(input == "m"){

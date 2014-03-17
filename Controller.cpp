@@ -67,7 +67,7 @@ void* scanInputSignals(void *param){
 				pthread_mutex_unlock(&signals_mutex);
 				motor->openDoor();
 				sleep(2);
-				pthread_kill(scanner, SIGUSR1);
+//				pthread_kill(scanner, SIGUSR1);
 				pthread_mutex_lock(&signals_mutex);
 				signals.motorUp = false;
 			}
@@ -85,7 +85,7 @@ void* scanInputSignals(void *param){
 			else{
 				signals.motorDown = false;
 				signals.motorUp = false;
-				pthread_kill(scanner, SIGUSR1);
+//				pthread_kill(scanner, SIGUSR1);
 				motor->stopDoor();
 			}
 

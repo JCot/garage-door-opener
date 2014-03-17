@@ -14,16 +14,16 @@
 
 using namespace std;
 
-static void sigintHandler(int sig){
-	printf("I did something!");
-	return;
-}
+//static void sigintHandler(int sig){
+//	printf("I did something!");
+//	return;
+//}
 
 Motor::Motor() {
 	// TODO Auto-generated constructor stub
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = sigintHandler;
+//	sigemptyset(&sa.sa_mask);
+//	sa.sa_flags = 0;
+//	sa.sa_handler = sigintHandler;
 
 }
 
@@ -34,9 +34,9 @@ Motor::~Motor() {
 void Motor::openDoor(){
 	pthread_mutex_lock(&signals_mutex);
 
-	struct timespec tim;
-	tim.tv_sec = 10;
-	tim.tv_nsec = 0;
+//	struct timespec tim;
+//	tim.tv_sec = 10;
+//	tim.tv_nsec = 0;
 
 	//TODO: Open door stuff
 	cout << "\nI am opening the door.\n";
@@ -44,9 +44,10 @@ void Motor::openDoor(){
 	signals.doorClosed = false;
 
 	pthread_mutex_unlock(&signals_mutex);
-	if(nanosleep(&tim, NULL) == -1){
-		return;
-	}
+	sleep(10);
+//	if(nanosleep(&tim, NULL) == -1){
+//		return;
+//	}
 
 	pthread_mutex_lock(&signals_mutex);
 	cout << "\nDoor opened\n";
@@ -58,9 +59,9 @@ void Motor::openDoor(){
 void Motor::closeDoor(){
 	pthread_mutex_lock(&signals_mutex);
 
-	struct timespec tim;
-	tim.tv_sec = 10;
-	tim.tv_nsec = 0;
+//	struct timespec tim;
+//	tim.tv_sec = 10;
+//	tim.tv_nsec = 0;
 
 	//TODO: Close door stuff
 	cout << "\nI am closing the door.\n";
@@ -68,9 +69,10 @@ void Motor::closeDoor(){
 	signals.doorOpen = false;
 
 	pthread_mutex_unlock(&signals_mutex);
-	if(nanosleep(&tim, NULL) == -1){
-		return;
-	}
+	sleep(10);
+//	if(nanosleep(&tim, NULL) == -1){
+//		return;
+//	}
 
 	pthread_mutex_lock(&signals_mutex);
 	cout << "\nDoor closed\n";
