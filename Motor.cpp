@@ -13,9 +13,17 @@
 
 using namespace std;
 
+static void sigintHandler(int sig){
+	cout << "I did something";
+	cout.flush();
+	return;
+}
+
 Motor::Motor() {
 	// TODO Auto-generated constructor stub
-
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigintHandler;
 }
 
 Motor::~Motor() {
@@ -36,6 +44,7 @@ void Motor::openDoor(){
 		return;
 	}
 
+	pthread_mutex_lock(&signals_mutex);
 	signals.doorClosed = false;
 	cout << "\nDoor opened\n";
 	cout.flush();
@@ -53,10 +62,12 @@ void Motor::closeDoor(){
 	//TODO: Close door stuff
 	cout << "\nI am closing the door.\n";
 	cout.flush();
+	pthread_mutex_unlock(&signals_mutex);
 	if(nanosleep(&tim, NULL) == -1){
 		return;
 	}
 
+	pthread_mutex_lock(&signals_mutex);
 	signals.doorOpen = false;
 	cout << "\nDoor closed\n";
 	cout.flush();

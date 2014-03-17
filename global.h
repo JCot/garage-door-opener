@@ -27,6 +27,8 @@ typedef struct{
 extern SIGNALS signals;
 extern pthread_mutex_t signals_mutex;
 extern pthread_cond_t done;
+extern pthread_t input;
+extern pthread_t scanner;
 extern queue <string> commands;
 
 #endif /* GLOBAL_H_ */

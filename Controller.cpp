@@ -47,12 +47,10 @@ void* scanInputSignals(void *param){
 
 			if(comm == "m"){
 				signals.motorOvercurrent = true;
-				pthread_mutex_unlock(&signals_mutex);
 			}
 
 			else if(comm == "i"){
 				signals.irInterrupted = true;
-				pthread_mutex_unlock(&signals_mutex);
 			}
 
 			else if(comm == "r"){
@@ -63,9 +61,12 @@ void* scanInputSignals(void *param){
 					signals.motorUp = true;
 					pthread_mutex_unlock(&signals_mutex);
 					motor->openDoor();
+					sleep(2);
+					cout << "I am about to kill the thread";
+					cout.flush();
+					pthread_kill(scanner, 7);
 					pthread_mutex_lock(&signals_mutex);
 					signals.motorUp = false;
-					pthread_mutex_unlock(&signals_mutex);
 				}
 
 				else if(signals.doorOpen){
@@ -74,15 +75,17 @@ void* scanInputSignals(void *param){
 					motor->closeDoor();
 					pthread_mutex_lock(&signals_mutex);
 					signals.motorDown = false;
-					pthread_mutex_unlock(&signals_mutex);
 				}
 
 				else{
+					signals.motorDown = false;
+					signals.motorUp = false;
 					pthread_mutex_unlock(&signals_mutex);
 					motor->stopDoor();
 				}
 
 				signals.buttonPressed = false;
+				pthread_mutex_unlock(&signals_mutex);
 			}
 		}
 	}
@@ -99,8 +102,8 @@ int main(int argc, char *argv[]) {
 	Controller control;
 	Motor *motor = new Motor();
 
-	pthread_t input;
-	pthread_t scanner;
+//	pthread_t input;
+//	pthread_t scanner;
 	pthread_attr_t attr;
 
 	pthread_mutex_init(&signals_mutex, NULL);
