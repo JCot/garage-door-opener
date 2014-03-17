@@ -66,6 +66,8 @@ void* scanInputSignals(void *param){
 				signals.motorUp = true;
 				pthread_mutex_unlock(&signals_mutex);
 				motor->openDoor();
+				sleep(2);
+				kill(scanner, SIGUSR1);
 				pthread_mutex_lock(&signals_mutex);
 				signals.motorUp = false;
 			}
@@ -83,7 +85,7 @@ void* scanInputSignals(void *param){
 			else{
 				signals.motorDown = false;
 				signals.motorUp = false;
-				pthread_kill(motorThread, 7);
+				pthread_kill(motorThread, SIGUSR1);
 				motor->stopDoor();
 			}
 
@@ -91,35 +93,6 @@ void* scanInputSignals(void *param){
 			pthread_mutex_unlock(&signals_mutex);
 		}
 	}
-
-//	pthread_mutex_lock(&mutex);
-
-//	if(buttonPressed){
-//		if(doorClosed){
-//			motorUp = true;
-//			pthread_mutex_unlock(&mutex);
-//			motor->openDoor();
-//			pthread_mutex_lock(&mutex);
-//			motorUp = false;
-//			pthread_mutex_unlock(&mutex);
-//		}
-//
-//		if(doorOpen){
-//			motorDown = true;
-//			pthread_mutex_unlock(&mutex);
-//			motor->closeDoor();
-//			pthread_mutex_lock(&mutex);
-//			motorDown = false;
-//			pthread_mutex_unlock(&mutex);
-//		}
-//
-//		else{
-//			pthread_mutex_unlock(&mutex);
-//			motor->stopDoor();
-//		}
-//
-//		buttonPressed = false;
-//	}
 }
 
 void* startScanner(void *param){
@@ -137,13 +110,10 @@ void* startMotor(void *param){
 int main(int argc, char *argv[]) {
 	Controller control;
 	Motor *motor = new Motor();
-<<<<<<< HEAD
-=======
 
 	pthread_t input;
 	pthread_t scanner;
 	pthread_t motor;
->>>>>>> 2add8955348e3d4d7bdc9043d16477aa5a26f7e2
 	
 	// To explicitly create a thread as joinable or detached, the attr argument 
 	// in the pthread_create() routine is used.

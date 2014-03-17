@@ -15,6 +15,7 @@
 using namespace std;
 
 static void sigintHandler(int sig){
+	printf("I did something!");
 	return;
 }
 
@@ -38,16 +39,19 @@ void Motor::openDoor(){
 	tim.tv_nsec = 0;
 
 	//TODO: Open door stuff
-	cout << "\nI am opening the door.\n";
+	cout << "\nI am opening the fucking door.\n";
 	cout.flush();
 	signals.doorClosed = false;
-//	sleep(10);
-	nanosleep(&tim, NULL);
 
+	pthread_mutex_unlock(&signals_mutex);
+	if(nanosleep(&tim, NULL) == -1){
+		return;
+	}
+
+	pthread_mutex_lock(&signals_mutex);
 	cout << "\nDoor opened\n";
 	cout.flush();
 	signals.doorOpen = true;
-	pthread_cond_signal(&done);
 	pthread_mutex_unlock(&signals_mutex);
 }
 
@@ -62,13 +66,16 @@ void Motor::closeDoor(){
 	cout << "\nI am closing the door.\n";
 	cout.flush();
 	signals.doorOpen = false;
-//	sleep(10);
-	nanosleep(tim, NULL);
 
+	pthread_mutex_unlock(&signals_mutex);
+	if(nanosleep(tim, NULL) == -1){
+		return;
+	}
+
+	pthread_mutex_lock(&signals_mutex);
 	cout << "\nDoor closed\n";
 	cout.flush();
 	signals.doorClosed = true;
-	pthread_cond_signal(&done);
 	pthread_mutex_unlock(&signals_mutex);
 }
 
@@ -79,7 +86,6 @@ void Motor::stopDoor(){
 	cout << "\nI am stopping the door.\n";
 	cout.flush();
 
-	pthread_cond_signal(&done);
 	cout << "\nDoor stopped\n";
 	cout.flush();
 	pthread_mutex_unlock(&signals_mutex);
