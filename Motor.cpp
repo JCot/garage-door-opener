@@ -31,7 +31,7 @@ Motor::~Motor() {
 }
 
 void Motor::openDoor(){
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&signals_mutex);
 
 	struct timespec tim;
 	tim.tv_sec = 10;
@@ -40,38 +40,47 @@ void Motor::openDoor(){
 	//TODO: Open door stuff
 	cout << "\nI am opening the door.\n";
 	cout.flush();
+	signals.doorClosed = false;
 //	sleep(10);
 	nanosleep(&tim, NULL);
 
-	pthread_cond_signal(&done);
-	doorClosed = false;
 	cout << "\nDoor opened\n";
 	cout.flush();
-	doorOpen = true;
-	pthread_mutex_unlock(&mutex);
+	signals.doorOpen = true;
+	pthread_cond_signal(&done);
+	pthread_mutex_unlock(&signals_mutex);
 }
 
 void Motor::closeDoor(){
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&signals_mutex);
+
+	struct timespec tim;
+	tim.tv_sec = 10;
+	tim.tv_nsec = 0;
 
 	//TODO: Close door stuff
 	cout << "\nI am closing the door.\n";
-	sleep(10);
+	cout.flush();
+	signals.doorOpen = false;
+//	sleep(10);
+	nanosleep(tim, NULL);
 
-	pthread_cond_signal(&done);
-	doorOpen = false;
 	cout << "\nDoor closed\n";
-	doorClosed = true;
-	pthread_mutex_unlock(&mutex);
+	cout.flush();
+	signals.doorClosed = true;
+	pthread_cond_signal(&done);
+	pthread_mutex_unlock(&signals_mutex);
 }
 
 void Motor::stopDoor(){
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&signals_mutex);
 
 	//TODO: Stop door stuff
 	cout << "\nI am stopping the door.\n";
+	cout.flush();
 
 	pthread_cond_signal(&done);
 	cout << "\nDoor stopped\n";
-	pthread_mutex_unlock(&mutex);
+	cout.flush();
+	pthread_mutex_unlock(&signals_mutex);
 }

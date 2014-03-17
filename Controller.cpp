@@ -38,63 +38,57 @@ void* startInput(void *param){
 }
 
 void* scanInputSignals(void *param){
-	Motor* motor = (Motor *)param;
+	Motor* motor = (Motor*)param;
 
-	while(true){
-		if(!commands.empty()){
-			pthread_mutex_lock(&mutex);
-			string comm = commands.front();
-			commands.pop();
+	if(!commands.empty()){
+		pthread_mutex_lock(&signals_mutex);
+		string comm = commands.front();
+		commands.pop();
 
-			if(comm == "m"){
-				motorOvercurrent = true;
-				cout << "Motor overcurrent detected.\n";
-				
-				// Always unlock mutex after everything is completed.
-				pthread_mutex_unlock(&mutex);
+		if(comm == "m"){
+			signals.motorOvercurrent = true;
+		}
+
+		else if(comm == "i"){
+			if(signals.irBeamOn){
+				signals.irInterrupted = true;
+				motor->stopDoor();
+				signals.irBeamOn = false;
+				motor->openDoor();
+			}
+		}
+
+		else if(comm == "r"){
+			signals.buttonPressed = true;
+			sleep(1);
+
+			if(signals.doorClosed){
+				signals.motorUp = true;
+				pthread_mutex_unlock(&signals_mutex);
+				motor->openDoor();
+				pthread_mutex_lock(&signals_mutex);
+				signals.motorUp = false;
 			}
 
-			else if(comm == "i"){
-				if(irBeamOn){
-					irInterrupted = true;
-					cout << "Infrared beam interruption.\n";
-					
-					pthread_mutex_unlock(&mutex);
-				}
+			else if(signals.doorOpen){
+				signals.motorDown = true;
+				signals.irBeamOn = true;
+				pthread_mutex_unlock(&signals_mutex);
+				motor->closeDoor();
+				pthread_mutex_lock(&signals_mutex);
+				signals.motorDown = false;
+				signals.irBeamOn = false;
 			}
 
-			else if(comm == "r"){
-				buttonPressed = true;
-				sleep(1);
-
-				if(doorClosed){
-					motorUp = true;
-					pthread_mutex_unlock(&mutex);
-					motor->openDoor();
-					pthread_mutex_lock(&mutex);
-					motorUp = false;
-					pthread_mutex_unlock(&mutex);
-				}
-
-				else if(doorOpen){
-					motorDown = true;
-					irBeamOn = true;
-					pthread_mutex_unlock(&mutex);
-					motor->closeDoor();
-					pthread_mutex_lock(&mutex);
-					motorDown = false;
-					irBeamOn = false;
-					pthread_mutex_unlock(&mutex);
-				}
-
-				else{
-					pthread_mutex_unlock(&mutex);
-					pthread_kill(motor, 7);
-					motor->stopDoor();
-				}
-
-				buttonPressed = false;
+			else{
+				signals.motorDown = false;
+				signals.motorUp = false;
+				pthread_kill(motorThread, 7);
+				motor->stopDoor();
 			}
+
+			signals.buttonPressed = false;
+			pthread_mutex_unlock(&signals_mutex);
 		}
 	}
 
@@ -128,20 +122,28 @@ void* scanInputSignals(void *param){
 //	}
 }
 
-void * startScanner(void *param){
+void* startScanner(void *param){
 	while(true){
 		scanInputSignals(param);
 		sleep(1);
 	}
 }
 
+void* startMotor(void *param){
+	Motor* motor = (Motor*)param;
+	while(true){}
+}
+
 int main(int argc, char *argv[]) {
 	Controller control;
 	Motor *motor = new Motor();
+<<<<<<< HEAD
+=======
 
 	pthread_t input;
 	pthread_t scanner;
 	pthread_t motor;
+>>>>>>> 2add8955348e3d4d7bdc9043d16477aa5a26f7e2
 	
 	// To explicitly create a thread as joinable or detached, the attr argument 
 	// in the pthread_create() routine is used.
@@ -160,9 +162,11 @@ int main(int argc, char *argv[]) {
 	The second thread goes through the queue executing commands. */
 	pthread_create(&input, NULL, startInput, (void *)1);
 	pthread_create(&scanner, NULL, startScanner, (void *)motor);
+	pthread_create(&motorThread, NULL, NULL, NULL);
 
 	pthread_join(input, NULL);
 	pthread_join(scanner, NULL);
+	pthread_join(motorThread, NULL);
 
 	//input.processInput();
 

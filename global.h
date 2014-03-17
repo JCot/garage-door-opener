@@ -14,14 +14,8 @@
 
 using namespace std;
 
-extern bool buttonPressed;
-extern bool doorClosed;
-extern bool doorOpen;
-extern bool motorUp;
-extern bool motorDown;
-extern bool irInterrupted;
-extern bool irBeamOn;
-extern bool motorOvercurrent;
+extern struct signals;
+
 extern pthread_mutex_t mutex;
 extern pthread_cond_t done;
 extern queue <string> commands;
