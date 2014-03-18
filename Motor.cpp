@@ -18,11 +18,12 @@ using namespace std;
 static void sigintHandler(int sig){
 	#ifdef DEBUG_V
 	cout << "Received signal: " << sig << endl;
+	#endif
+	
 	
 	// If we get this interrupt while not sleeping, we need another way to 
 	// indicate that we should stop.
 	signals.interruptMovement = true;
-	#endif
 	cout.flush();
 	return;
 }
@@ -50,7 +51,7 @@ void Motor::waitForInput(){
 			openDoor();
 		}
 
-		else{
+		else if(signals.doorOpening){
 			signals.motorUp = false;
 			stopDoor();
 		}
@@ -81,7 +82,9 @@ void Motor::waitForInput(){
 		}
 
 		else if(signals.doorOpen || 
-			(signals.interrupted && signals.doorOpening)){
+			(signals.interrupted && signals.doorOpening) ||
+			(signals.motorOvercurrent && signals.doorOpening)){
+			signals.motorOvercurrent = false;
 			signals.motorDown = true;
 			closeDoor();
 			signals.motorDown = false;

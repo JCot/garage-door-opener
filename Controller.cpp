@@ -79,7 +79,7 @@ void* scanInputSignals(void *param){
 
 		else if(comm == "r"){
 			if(!signals.doorClosed && !signals.doorOpen 
-				&& !signals.interrupted){
+				&& !signals.interrupted && !signals.motorOvercurrent){
 				cout << "Interrupting door operation...\n";
 				cout.flush();
 				pthread_kill(motorThread, SIGUSR1);
@@ -118,10 +118,10 @@ int main(int argc, char *argv[]) {
 	Controller control;
 	Motor *motor = new Motor();
 	pthread_attr_t attr;
-	cout << "Welcome to the Garage Door Opener!\n";
+	cout << "\nWelcome to the Garage Door Opener!\n";
 	cout << "The door is closed, motor is off, and infrared beam is off.\n";
-	cout << "Enter \'r\' to raise/lower door, \'m\' for motor overcurrent, 
-			\'i\' for infrared beam interrupt.";
+	cout << "Enter 'r' to raise/lower door, 'm' for motor overcurrent,"
+			<< " 'i' for infrared beam interrupt.\n\n";
 
 	pthread_mutex_init(&signals_mutex, NULL);
 	sem_init(&commands_semaphore, 0, 0);
