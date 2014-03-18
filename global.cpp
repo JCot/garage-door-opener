@@ -11,7 +11,7 @@
 
 using namespace std;
 
-SIGNALS signals{false, true, false, false, false, false, false, false};
+SIGNALS signals{false, true, false, false, false, false, false, false, false, ""};
 
 pthread_mutex_t signals_mutex;
 pthread_cond_t done;

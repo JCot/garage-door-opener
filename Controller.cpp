@@ -39,71 +39,88 @@ void* startInput(void *param){
 void* scanInputSignals(void *param){
 	Motor* motor = (Motor *)param;
 
-	while(true){
-		if(!commands.empty()){
-			pthread_mutex_lock(&signals_mutex);
-			string comm = commands.front();
-			commands.pop();
+	if(!commands.empty()){
+		pthread_mutex_lock(&signals_mutex);
+		string comm = commands.front();
+		commands.pop();
+		signals.lastCommand = comm;
 
-			if(comm == "m"){
-				signals.motorOvercurrent = true;
+		if(comm == "m"){
+			signals.motorOvercurrent = true;
+			pthread_cond_signal(&done);
+			pthread_mutex_unlock(&signals_mutex);
+		}
+
+		else if(comm == "i"){
+			signals.irInterrupted = true;
+			pthread_cond_signal(&done);
+			pthread_mutex_unlock(&signals_mutex);
+		}
+
+		else if(comm == "r"){
+//			signals.buttonPressed = true;
+//			sleep(1);
+//
+//			if(signals.doorClosed){
+//				signals.motorUp = true;
+//				pthread_mutex_unlock(&signals_mutex);
+//				motor->openDoor();
+//				pthread_mutex_lock(&signals_mutex);
+//				signals.motorUp = false;
+//			}
+//
+//			else if(signals.doorOpen){
+//				signals.motorDown = true;
+//				pthread_mutex_unlock(&signals_mutex);
+//				motor->closeDoor();
+//				pthread_mutex_lock(&signals_mutex);
+//				signals.motorDown = false;
+//			}
+//
+//			else{
+//				signals.motorDown = false;
+//				signals.motorUp = false;
+//				signals.interrupted = true;
+//				pthread_mutex_unlock(&signals_mutex);
+//				motor->stopDoor();
+//			}
+//
+//			signals.buttonPressed = false;
+
+			if(!signals.doorClosed && !signals.doorOpen){
+				cout << "This is broken";
+				cout.flush();
+				pthread_kill(motorThread, SIGUSR1);
 			}
 
-			else if(comm == "i"){
-				signals.irInterrupted = true;
-			}
-
-			else if(comm == "r"){
-				signals.buttonPressed = true;
-				sleep(1);
-
-				if(signals.doorClosed){
-					signals.motorUp = true;
-					pthread_mutex_unlock(&signals_mutex);
-					motor->openDoor();
-					sleep(2);
-					cout << "I am about to kill the thread";
-					cout.flush();
-					pthread_kill(scanner, 7);
-					pthread_mutex_lock(&signals_mutex);
-					signals.motorUp = false;
-				}
-
-				else if(signals.doorOpen){
-					signals.motorDown = true;
-					pthread_mutex_unlock(&signals_mutex);
-					motor->closeDoor();
-					pthread_mutex_lock(&signals_mutex);
-					signals.motorDown = false;
-				}
-
-				else{
-					signals.motorDown = false;
-					signals.motorUp = false;
-					pthread_mutex_unlock(&signals_mutex);
-					motor->stopDoor();
-				}
-
-				signals.buttonPressed = false;
+			else{
+				pthread_cond_signal(&done);
 				pthread_mutex_unlock(&signals_mutex);
 			}
 		}
+
+		pthread_cond_signal(&done);
+		pthread_mutex_unlock(&signals_mutex);
 	}
 }
 
-void * startScanner(void *param){
+void* startScanner(void *param){
 	while(true){
 		scanInputSignals(param);
 		sleep(1);
 	}
 }
 
+void* startMotor(void *param){
+	Motor* motor = (Motor*)param;
+	while(true){
+		motor->waitForInput();
+	}
+}
+
 int main(int argc, char *argv[]) {
 	Controller control;
 	Motor *motor = new Motor();
-
-//	pthread_t input;
-//	pthread_t scanner;
 	pthread_attr_t attr;
 
 	pthread_mutex_init(&signals_mutex, NULL);
@@ -114,11 +131,10 @@ int main(int argc, char *argv[]) {
 
 	pthread_create(&input, NULL, startInput, (void *)1);
 	pthread_create(&scanner, NULL, startScanner, (void *)motor);
+	pthread_create(&motorThread, NULL, startMotor, (void*)motor);
 
 	pthread_join(input, NULL);
 	pthread_join(scanner, NULL);
-
-	//input.processInput();
 
 	return EXIT_SUCCESS;
 }

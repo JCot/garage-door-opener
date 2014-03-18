@@ -30,6 +30,62 @@ Motor::~Motor() {
 	// TODO Auto-generated destructor stub
 }
 
+void Motor::waitForInput(){
+	pthread_mutex_lock(&signals_mutex);
+	pthread_cond_wait(&done, &signals_mutex);
+
+	if(signals.lastCommand == "m"){
+		if(signals.motorDown){
+			signals.motorDown = false;
+			signals.motorUp = true;
+			openDoor();
+		}
+
+		else{
+			signals.motorUp = false;
+			stopDoor();
+		}
+	}
+
+	else if(signals.lastCommand == "i"){
+		if(signals.motorDown){
+			signals.motorDown = false;
+			signals.motorUp = true;
+			openDoor();
+		}
+	}
+
+	else if(signals.lastCommand == "r"){
+		sleep(1);
+
+		if(signals.doorClosed){
+			signals.motorUp = true;
+			pthread_mutex_unlock(&signals_mutex);
+			openDoor();
+			pthread_mutex_lock(&signals_mutex);
+			signals.motorUp = false;
+		}
+
+		else if(signals.doorOpen){
+			signals.motorDown = true;
+			pthread_mutex_unlock(&signals_mutex);
+			closeDoor();
+			pthread_mutex_lock(&signals_mutex);
+			signals.motorDown = false;
+		}
+
+		else{
+			signals.motorDown = false;
+			signals.motorUp = false;
+			signals.interrupted = true;
+			pthread_mutex_unlock(&signals_mutex);
+			stopDoor();
+		}
+
+		signals.buttonPressed = false;
+	}
+}
+
 void Motor::openDoor(){
 	pthread_mutex_lock(&signals_mutex);
 
@@ -40,6 +96,21 @@ void Motor::openDoor(){
 	//TODO: Open door stuff
 	cout << "\nI am opening the door.\n";
 	cout.flush();
+//	for(int i = 1; i <= 10; i++){
+//		pthread_mutex_unlock(&signals_mutex);
+//		nanosleep(&tim, NULL);
+//		pthread_mutex_lock(&signals_mutex);
+//		cout << i << " seconds passed\n";
+//		cout.flush();
+//		if(signals.interrupted){
+//			cout << "Hi";
+//			cout.flush();
+//			stopDoor();
+//			signals.interrupted = false;
+//			pthread_mutex_unlock(&signals_mutex);
+//			return;
+//		}
+//	}
 	if(nanosleep(&tim, NULL) == -1){
 		return;
 	}
