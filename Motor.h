@@ -2,7 +2,7 @@
  * Motor.h
  *
  *  Created on: Mar 11, 2014
- *      Author: jdc9622
+ *      Author: jdc9622, Jenny Zhen
  */
 
 #ifndef MOTOR_H_

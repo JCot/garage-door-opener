@@ -2,7 +2,7 @@
  * Motor.cpp
  *
  *  Created on: Mar 11, 2014
- *      Author: jdc9622
+ *      Author: jdc9622, Jenny Zhen
  */
 
 #include "Motor.h"

@@ -2,7 +2,7 @@
  * global.cpp
  *
  *  Created on: Mar 10, 2014
- *      Author: jdc9622
+ *      Author: jdc9622, Jenny Zhen
  */
 
 #include "global.h"

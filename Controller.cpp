@@ -2,7 +2,7 @@
  * Controller.cpp
  *
  *  Created on: Mar 10, 2014
- *      Author: Justin Cotner
+ *      Author: Justin Cotner, Jenny Zhen
  */
 
 #include "Controller.h"

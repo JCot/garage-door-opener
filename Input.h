@@ -2,7 +2,7 @@
  * Input.h
  *
  *  Created on: Mar 10, 2014
- *      Author: jdc9622
+ *      Author: jdc9622, Jenny Zhen
  */
 
 #ifndef INPUT_H_
