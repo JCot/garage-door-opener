@@ -1,0 +1,10 @@
+I-Logix-RPY-Archive version 8.7.1 * 5066837
+
+- filesTable = { IRPYRawContainer 
+	- size = 3;
+	- value = "GarageDoorOpener_group04.rpy" ""
+	"GarageDoorOpener_group04_rpy\\Default.sbs" "Default"
+	"GarageDoorOpener_group04_rpy\\DefaultComponent.cmp" "DefaultComponent"
+	
+}
+
