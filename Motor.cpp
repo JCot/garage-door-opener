@@ -13,8 +13,12 @@
 
 using namespace std;
 
+#define DEBUG_
+
 static void sigintHandler(int sig){
-	cout << "I did something";
+	#ifdef DEBUG
+	cout << "Received signal: " << sig << endl;
+	#endif
 	cout.flush();
 	return;
 }
@@ -32,8 +36,8 @@ Motor::~Motor() {
 }
 
 void Motor::waitForInput(){
+	sem_wait(&commands_semaphore);
 	pthread_mutex_lock(&signals_mutex);
-	pthread_cond_wait(&done, &signals_mutex);
 
 	if(signals.lastCommand == "m"){
 		if(signals.motorDown){
@@ -59,38 +63,34 @@ void Motor::waitForInput(){
 	else if(signals.lastCommand == "r"){
 		sleep(1);
 
-		if(signals.doorClosed){
+		if(signals.doorClosed || (signals.interrupted && signals.doorClosing)){
 			signals.motorUp = true;
-			pthread_mutex_unlock(&signals_mutex);
 			openDoor();
-			pthread_mutex_lock(&signals_mutex);
 			signals.motorUp = false;
-			pthread_mutex_unlock(&signals_mutex);
 		}
 
-		else if(signals.doorOpen){
+		else if(signals.doorOpen || (signals.interrupted && signals.doorOpening)){
 			signals.motorDown = true;
-			pthread_mutex_unlock(&signals_mutex);
 			closeDoor();
-			pthread_mutex_lock(&signals_mutex);
 			signals.motorDown = false;
-			pthread_mutex_unlock(&signals_mutex);
 		}
 
 		else{
 			signals.motorDown = false;
 			signals.motorUp = false;
 			signals.interrupted = true;
-			pthread_mutex_unlock(&signals_mutex);
 			stopDoor();
 		}
 
 		signals.buttonPressed = false;
 	}
+	pthread_mutex_unlock(&signals_mutex);
 }
 
 void Motor::openDoor(){
-	pthread_mutex_lock(&signals_mutex);
+	signals.doorClosed = false;
+	signals.interrupted = false;
+	signals.doorOpening = true;
 
 	struct timespec tim;
 	tim.tv_sec = 10;
@@ -100,9 +100,7 @@ void Motor::openDoor(){
 	cout << "\nI am opening the door.\n";
 	cout.flush();
 //	for(int i = 1; i <= 10; i++){
-//		pthread_mutex_unlock(&signals_mutex);
 //		nanosleep(&tim, NULL);
-//		pthread_mutex_lock(&signals_mutex);
 //		cout << i << " seconds passed\n";
 //		cout.flush();
 //		if(signals.interrupted){
@@ -110,25 +108,26 @@ void Motor::openDoor(){
 //			cout.flush();
 //			stopDoor();
 //			signals.interrupted = false;
-//			pthread_mutex_unlock(&signals_mutex);
 //			return;
 //		}
 //	}
 	if(nanosleep(&tim, NULL) == -1){
-		cout << "I am returning\n";
+		#ifdef DEBUG
+		cout << "I was interrupted; returning!\n";
+		#endif
 		return;
 	}
 	
-	//pthread_mutex_lock(&signals_mutex); already locked at top of function
-	signals.doorClosed = false;
 	cout << "\nDoor opened\n";
 	cout.flush();
 	signals.doorOpen = true;
-	pthread_mutex_unlock(&signals_mutex);
+	signals.doorOpening = false;
 }
 
 void Motor::closeDoor(){
-	pthread_mutex_lock(&signals_mutex);
+	signals.doorOpen = false;
+	signals.interrupted = false;
+	signals.doorClosing = true;
 
 	struct timespec tim;
 	tim.tv_sec = 10;
@@ -139,19 +138,19 @@ void Motor::closeDoor(){
 	cout.flush();
 	pthread_mutex_unlock(&signals_mutex);
 	if(nanosleep(&tim, NULL) == -1){
+		#ifdef DEBUG
+		cout << "I was interrupted; returning!\n";
+		#endif
 		return;
 	}
 
-	pthread_mutex_lock(&signals_mutex);
-	signals.doorOpen = false;
 	cout << "\nDoor closed\n";
 	cout.flush();
 	signals.doorClosed = true;
-	pthread_mutex_unlock(&signals_mutex);
+	signals.doorClosing = false;
 }
 
 void Motor::stopDoor(){
-	pthread_mutex_lock(&signals_mutex);
 
 	//TODO: Stop door stuff
 	cout << "\nI am stopping the door.\n";
@@ -159,5 +158,4 @@ void Motor::stopDoor(){
 
 	cout << "\nDoor stopped\n";
 	cout.flush();
-	pthread_mutex_unlock(&signals_mutex);
 }

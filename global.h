@@ -9,6 +9,7 @@
 #define GLOBAL_H_
 
 #include <pthread.h>
+#include <semaphore.h>
 #include <queue>
 #include <string>
 
@@ -24,11 +25,14 @@ typedef struct{
 	bool irBeamOn;
 	bool motorOvercurrent;
 	bool interrupted;
+	bool doorOpening;
+	bool doorClosing;
 	string lastCommand;
 }SIGNALS;
 
 extern SIGNALS signals;
 extern pthread_mutex_t signals_mutex;
+extern sem_t commands_semaphore;
 extern pthread_cond_t done;
 extern pthread_t input;
 extern pthread_t scanner;

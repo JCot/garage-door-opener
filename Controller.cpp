@@ -22,7 +22,7 @@ using namespace std;
 //extern pthread_mutex_t signals_mutex;
 //extern pthread_cond_t done;
 
-#define DEBUG
+#define DEBUG_
 
 Controller::Controller() {
 	// TODO Auto-generated constructor stub
@@ -46,7 +46,12 @@ void* scanInputSignals(void *param){
 		cout << "Got a new command!\n";
 		cout.flush();
 		#endif
-		pthread_mutex_lock(&signals_mutex);
+
+		// if we lock the mutex, we cannot recieve anymore 
+		// signals until unlocked. Since we want to interrupt actions, 
+		// we can't lock on the signals_mutex (since opening/closing 
+		// the door locks it).
+		//pthread_mutex_lock(&signals_mutex);
 		string comm = commands.front();
 		commands.pop();
 		signals.lastCommand = comm;
@@ -59,13 +64,13 @@ void* scanInputSignals(void *param){
 		if(comm == "m"){
 			signals.motorOvercurrent = true;
 			pthread_cond_signal(&done);
-			pthread_mutex_unlock(&signals_mutex);
+			//pthread_mutex_unlock(&signals_mutex);
 		}
 
 		else if(comm == "i"){
 			signals.irInterrupted = true;
 			pthread_cond_signal(&done);
-			pthread_mutex_unlock(&signals_mutex);
+			//pthread_mutex_unlock(&signals_mutex);
 		}
 
 		else if(comm == "r"){
@@ -98,23 +103,23 @@ void* scanInputSignals(void *param){
 //
 //			signals.buttonPressed = false;
 
-			if(!signals.doorClosed && !signals.doorOpen){
-				cout << "This is broken";
+			if(!signals.doorClosed && !signals.doorOpen && !signals.interrupted){
+				cout << "Interrupting door operation...\n";
 				cout.flush();
 				pthread_kill(motorThread, SIGUSR1);
 			}
 
-			else{
-				#ifdef DEBUG
-				cout << "Waiting for Motor to read signal...\n";
-				cout.flush();
-				#endif
-				pthread_mutex_unlock(&signals_mutex);
-				pthread_cond_signal(&done);
-			}
+			#ifdef DEBUG
+			cout << "Waiting for Motor to read signal...\n";
+			cout.flush();
+			#endif
+			//pthread_mutex_unlock(&signals_mutex);
+			// Ensure that motor gets all the commands that were
+			// processed.
+			sem_post(&commands_semaphore);
 		}
 
-		pthread_cond_signal(&done);
+		//pthread_cond_signal(&done); Not using anymore?
 		pthread_mutex_unlock(&signals_mutex);
 	}
 }
@@ -139,6 +144,7 @@ int main(int argc, char *argv[]) {
 	pthread_attr_t attr;
 
 	pthread_mutex_init(&signals_mutex, NULL);
+	sem_init(&commands_semaphore, 0, 0);
 	pthread_cond_init(&done, NULL);
 
 	pthread_attr_init(&attr);
