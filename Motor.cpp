@@ -18,6 +18,9 @@ using namespace std;
 static void sigintHandler(int sig){
 	#ifdef DEBUG_V
 	cout << "Received signal: " << sig << endl;
+	
+	// If we get this interrupt while not sleeping, we need another way to 
+	// indicate that we should stop.
 	signals.interruptMovement = true;
 	#endif
 	cout.flush();
@@ -54,7 +57,7 @@ void Motor::waitForInput(){
 	}
 
 	else if(signals.lastCommand == "i"){
-		if(signals.motorDown){
+		if(signals.doorClosing){
 			signals.motorDown = false;
 			signals.motorUp = true;
 			openDoor();
@@ -64,7 +67,7 @@ void Motor::waitForInput(){
 	else if(signals.lastCommand == "r"){
 		sleep(1);
 
-		#ifdef DEBUG
+		#ifdef DEBUG_V
 		if(signals.interrupted == true){
 			cout << "Door interrupted, direction up? " << signals.doorClosing 
 				<< endl;
@@ -108,24 +111,21 @@ void Motor::openDoor(){
 
 	//TODO: Open door stuff
 	cout << "I am opening the door.\n";
+	cout << "\tOpening for: " << (10 - signals.secondsPassed) << " seconds.\n";
 	cout.flush();
-
-	#ifdef DEBUG
-	cout << "Opening for: " << (10 - signals.secondsPassed) << " seconds.\n";
-	#endif
 
 	int i = 1;
 	while(signals.secondsPassed < 10){
-		if(nanosleep(&tim, NULL) == -1){
+		if(nanosleep(&tim, NULL) == -1 || signals.interruptMovement){
 			#ifdef DEBUG_V
 			cout << "I was interrupted; returning!\n";
 			#endif
+			signals.interruptMovement = false;
 			return;
 		}
 		signals.secondsPassed++;
-		#ifdef DEBUG
-		cout << "Opening for " << i++ << " seconds...\n";
-		#endif
+		cout << "\t\tOpening for " << i++ << " seconds...\n";
+		cout.flush();
 	}
 	
 	cout << "Door opened.\n";
@@ -139,36 +139,36 @@ void Motor::closeDoor(){
 	signals.interrupted = false;
 	signals.doorClosing = true;
 	signals.doorOpening = false;
-
+	signals.irBeamOn = true;
+	
 	struct timespec tim;
 	tim.tv_sec = 1;
 	tim.tv_nsec = 0;
 
 	//TODO: Close door stuff
-	cout << "I am closing the door.\n";
+	cout << "I am closing the door.\n\tI am turning on the infrared beam.\n";
+	cout << "\tClosing for: " << signals.secondsPassed << " seconds.\n";
 	cout.flush();
-	
-	#ifdef DEBUG
-	cout << "Closing for: " << signals.secondsPassed << " seconds.\n";
-	#endif
 	
 	int i = 1;
 	while(signals.secondsPassed > 0){
-		if(nanosleep(&tim, NULL) == -1){
+		if(nanosleep(&tim, NULL) == -1 || signals.interruptMovement){
 			#ifdef DEBUG_V
 			cout << "I was interrupted; returning!\n";
 			#endif
+			signals.interruptMovement = false;
+			signals.irBeamOn = false;
 			return;
 		}
-		#ifdef DEBUG
-		cout << "Closing for " << i++ << " seconds...\n";
-		#endif
+		cout << "\t\tClosing for " << i++ << " seconds...\n";
+		cout.flush();
 		signals.secondsPassed--;
 	}
 
 	cout << "Door closed.\n";
 	cout.flush();
 	signals.doorClosed = true;
+	signals.irBeamOn = false;
 	signals.doorClosing = false;
 }
 

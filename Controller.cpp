@@ -69,42 +69,15 @@ void* scanInputSignals(void *param){
 			sem_post(&commands_semaphore);
 		}
 
-		else if(comm == "i"){
+		else if(comm == "i" && signals.irBeamOn){
+			pthread_kill(motorThread, SIGUSR1);
+			pthread_mutex_lock(&signals_mutex);
 			signals.irInterrupted = true;
-			pthread_cond_signal(&done);
-			//pthread_mutex_unlock(&signals_mutex);
+			pthread_mutex_unlock(&signals_mutex);
+			sem_post(&commands_semaphore);
 		}
 
 		else if(comm == "r"){
-//			signals.buttonPressed = true;
-//			sleep(1);
-//
-//			if(signals.doorClosed){
-//				signals.motorUp = true;
-//				pthread_mutex_unlock(&signals_mutex);
-//				motor->openDoor();
-//				pthread_mutex_lock(&signals_mutex);
-//				signals.motorUp = false;
-//			}
-//
-//			else if(signals.doorOpen){
-//				signals.motorDown = true;
-//				pthread_mutex_unlock(&signals_mutex);
-//				motor->closeDoor();
-//				pthread_mutex_lock(&signals_mutex);
-//				signals.motorDown = false;
-//			}
-//
-//			else{
-//				signals.motorDown = false;
-//				signals.motorUp = false;
-//				signals.interrupted = true;
-//				pthread_mutex_unlock(&signals_mutex);
-//				motor->stopDoor();
-//			}
-//
-//			signals.buttonPressed = false;
-
 			if(!signals.doorClosed && !signals.doorOpen 
 				&& !signals.interrupted){
 				cout << "Interrupting door operation...\n";
@@ -116,7 +89,7 @@ void* scanInputSignals(void *param){
 			cout << "Waiting for Motor to read signal...\n";
 			cout.flush();
 			#endif
-			//pthread_mutex_unlock(&signals_mutex);
+
 			// Ensure that motor gets all the commands that were
 			// processed.
 			sem_post(&commands_semaphore);
@@ -145,6 +118,10 @@ int main(int argc, char *argv[]) {
 	Controller control;
 	Motor *motor = new Motor();
 	pthread_attr_t attr;
+	cout << "Welcome to the Garage Door Opener!\n";
+	cout << "The door is closed, motor is off, and infrared beam is off.\n";
+	cout << "Enter \'r\' to raise/lower door, \'m\' for motor overcurrent, 
+			\'i\' for infrared beam interrupt.";
 
 	pthread_mutex_init(&signals_mutex, NULL);
 	sem_init(&commands_semaphore, 0, 0);
