@@ -11,7 +11,8 @@
 
 using namespace std;
 
-SIGNALS signals{false, true, false, false, false, false, false, false, false, false, false, ""};
+SIGNALS signals{false, true, false, false, false, false, false, 
+false, false, false, false, false, "", 0};
 
 pthread_mutex_t signals_mutex;
 sem_t commands_semaphore;

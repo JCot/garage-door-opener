@@ -27,7 +27,9 @@ typedef struct{
 	bool interrupted;
 	bool doorOpening;
 	bool doorClosing;
+	bool interruptMovement;
 	string lastCommand;
+	int secondsPassed;
 }SIGNALS;
 
 extern SIGNALS signals;

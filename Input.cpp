@@ -14,6 +14,8 @@
 
 using namespace std;
 
+#define SUPPRESS
+
 Input::Input() {
 	// TODO Auto-generated constructor stub
 
@@ -26,7 +28,9 @@ Input::~Input() {
 void* Input::processInput(){
 	while(true){
 		string input;
+		#ifndef SUPPRESS
 		cout << "Please enter a command: ";
+		#endif
 		getline(cin, input);
 
 //		if(input == "m"){

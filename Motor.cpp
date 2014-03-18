@@ -13,11 +13,12 @@
 
 using namespace std;
 
-#define DEBUG_
+#define DEBUG
 
 static void sigintHandler(int sig){
-	#ifdef DEBUG
+	#ifdef DEBUG_V
 	cout << "Received signal: " << sig << endl;
+	signals.interruptMovement = true;
 	#endif
 	cout.flush();
 	return;
@@ -40,7 +41,7 @@ void Motor::waitForInput(){
 	pthread_mutex_lock(&signals_mutex);
 
 	if(signals.lastCommand == "m"){
-		if(signals.motorDown){
+		if(signals.doorClosing){
 			signals.motorDown = false;
 			signals.motorUp = true;
 			openDoor();
@@ -63,13 +64,21 @@ void Motor::waitForInput(){
 	else if(signals.lastCommand == "r"){
 		sleep(1);
 
+		#ifdef DEBUG
+		if(signals.interrupted == true){
+			cout << "Door interrupted, direction up? " << signals.doorClosing 
+				<< endl;
+		}
+		#endif
+		
 		if(signals.doorClosed || (signals.interrupted && signals.doorClosing)){
 			signals.motorUp = true;
 			openDoor();
 			signals.motorUp = false;
 		}
 
-		else if(signals.doorOpen || (signals.interrupted && signals.doorOpening)){
+		else if(signals.doorOpen || 
+			(signals.interrupted && signals.doorOpening)){
 			signals.motorDown = true;
 			closeDoor();
 			signals.motorDown = false;
@@ -91,34 +100,35 @@ void Motor::openDoor(){
 	signals.doorClosed = false;
 	signals.interrupted = false;
 	signals.doorOpening = true;
+	signals.doorClosing = false;
 
 	struct timespec tim;
-	tim.tv_sec = 10;
+	tim.tv_sec = 1;
 	tim.tv_nsec = 0;
 
 	//TODO: Open door stuff
-	cout << "\nI am opening the door.\n";
+	cout << "I am opening the door.\n";
 	cout.flush();
-//	for(int i = 1; i <= 10; i++){
-//		nanosleep(&tim, NULL);
-//		cout << i << " seconds passed\n";
-//		cout.flush();
-//		if(signals.interrupted){
-//			cout << "Hi";
-//			cout.flush();
-//			stopDoor();
-//			signals.interrupted = false;
-//			return;
-//		}
-//	}
-	if(nanosleep(&tim, NULL) == -1){
+
+	#ifdef DEBUG
+	cout << "Opening for: " << (10 - signals.secondsPassed) << " seconds.\n";
+	#endif
+
+	int i = 1;
+	while(signals.secondsPassed < 10){
+		if(nanosleep(&tim, NULL) == -1){
+			#ifdef DEBUG_V
+			cout << "I was interrupted; returning!\n";
+			#endif
+			return;
+		}
+		signals.secondsPassed++;
 		#ifdef DEBUG
-		cout << "I was interrupted; returning!\n";
+		cout << "Opening for " << i++ << " seconds...\n";
 		#endif
-		return;
 	}
 	
-	cout << "\nDoor opened\n";
+	cout << "Door opened.\n";
 	cout.flush();
 	signals.doorOpen = true;
 	signals.doorOpening = false;
@@ -128,23 +138,35 @@ void Motor::closeDoor(){
 	signals.doorOpen = false;
 	signals.interrupted = false;
 	signals.doorClosing = true;
+	signals.doorOpening = false;
 
 	struct timespec tim;
-	tim.tv_sec = 10;
+	tim.tv_sec = 1;
 	tim.tv_nsec = 0;
 
 	//TODO: Close door stuff
-	cout << "\nI am closing the door.\n";
+	cout << "I am closing the door.\n";
 	cout.flush();
-	pthread_mutex_unlock(&signals_mutex);
-	if(nanosleep(&tim, NULL) == -1){
+	
+	#ifdef DEBUG
+	cout << "Closing for: " << signals.secondsPassed << " seconds.\n";
+	#endif
+	
+	int i = 1;
+	while(signals.secondsPassed > 0){
+		if(nanosleep(&tim, NULL) == -1){
+			#ifdef DEBUG_V
+			cout << "I was interrupted; returning!\n";
+			#endif
+			return;
+		}
 		#ifdef DEBUG
-		cout << "I was interrupted; returning!\n";
+		cout << "Closing for " << i++ << " seconds...\n";
 		#endif
-		return;
+		signals.secondsPassed--;
 	}
 
-	cout << "\nDoor closed\n";
+	cout << "Door closed.\n";
 	cout.flush();
 	signals.doorClosed = true;
 	signals.doorClosing = false;
@@ -153,9 +175,9 @@ void Motor::closeDoor(){
 void Motor::stopDoor(){
 
 	//TODO: Stop door stuff
-	cout << "\nI am stopping the door.\n";
+	cout << "I am stopping the door.\n";
 	cout.flush();
 
-	cout << "\nDoor stopped\n";
+	cout << "Door stopped.\n";
 	cout.flush();
 }

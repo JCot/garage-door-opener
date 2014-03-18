@@ -62,9 +62,11 @@ void* scanInputSignals(void *param){
 		#endif
 
 		if(comm == "m"){
+			pthread_kill(motorThread, SIGUSR1);
+			pthread_mutex_lock(&signals_mutex);
 			signals.motorOvercurrent = true;
-			pthread_cond_signal(&done);
-			//pthread_mutex_unlock(&signals_mutex);
+			pthread_mutex_unlock(&signals_mutex);
+			sem_post(&commands_semaphore);
 		}
 
 		else if(comm == "i"){
@@ -103,7 +105,8 @@ void* scanInputSignals(void *param){
 //
 //			signals.buttonPressed = false;
 
-			if(!signals.doorClosed && !signals.doorOpen && !signals.interrupted){
+			if(!signals.doorClosed && !signals.doorOpen 
+				&& !signals.interrupted){
 				cout << "Interrupting door operation...\n";
 				cout.flush();
 				pthread_kill(motorThread, SIGUSR1);
