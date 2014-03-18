@@ -24,6 +24,7 @@ Motor::Motor() {
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sa.sa_handler = sigintHandler;
+	signal(SIGUSR1, sigintHandler);
 }
 
 Motor::~Motor() {
@@ -64,6 +65,7 @@ void Motor::waitForInput(){
 			openDoor();
 			pthread_mutex_lock(&signals_mutex);
 			signals.motorUp = false;
+			pthread_mutex_unlock(&signals_mutex);
 		}
 
 		else if(signals.doorOpen){
@@ -72,6 +74,7 @@ void Motor::waitForInput(){
 			closeDoor();
 			pthread_mutex_lock(&signals_mutex);
 			signals.motorDown = false;
+			pthread_mutex_unlock(&signals_mutex);
 		}
 
 		else{
@@ -112,10 +115,11 @@ void Motor::openDoor(){
 //		}
 //	}
 	if(nanosleep(&tim, NULL) == -1){
+		cout << "I am returning\n";
 		return;
 	}
-
-	pthread_mutex_lock(&signals_mutex);
+	
+	//pthread_mutex_lock(&signals_mutex); already locked at top of function
 	signals.doorClosed = false;
 	cout << "\nDoor opened\n";
 	cout.flush();

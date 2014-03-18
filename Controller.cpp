@@ -22,6 +22,8 @@ using namespace std;
 //extern pthread_mutex_t signals_mutex;
 //extern pthread_cond_t done;
 
+#define DEBUG
+
 Controller::Controller() {
 	// TODO Auto-generated constructor stub
 
@@ -40,10 +42,19 @@ void* scanInputSignals(void *param){
 	Motor* motor = (Motor *)param;
 
 	if(!commands.empty()){
+		#ifdef DEBUG
+		cout << "Got a new command!\n";
+		cout.flush();
+		#endif
 		pthread_mutex_lock(&signals_mutex);
 		string comm = commands.front();
 		commands.pop();
 		signals.lastCommand = comm;
+
+		#ifdef DEBUG
+		cout << "Processing '" << comm << "'...\n";
+		cout.flush();
+		#endif
 
 		if(comm == "m"){
 			signals.motorOvercurrent = true;
@@ -94,8 +105,12 @@ void* scanInputSignals(void *param){
 			}
 
 			else{
-				pthread_cond_signal(&done);
+				#ifdef DEBUG
+				cout << "Waiting for Motor to read signal...\n";
+				cout.flush();
+				#endif
 				pthread_mutex_unlock(&signals_mutex);
+				pthread_cond_signal(&done);
 			}
 		}
 
