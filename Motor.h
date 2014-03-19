@@ -14,7 +14,6 @@ class Motor {
 public:
 	Motor();
 	virtual ~Motor();
-	void waitForInput();
 	void openDoor();
 	void closeDoor();
 	void stopDoor();

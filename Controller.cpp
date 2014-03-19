@@ -39,7 +39,6 @@ void* startInput(void *param){
 }
 
 void* scanInputSignals(void *param){
-	Motor* motor = (Motor *)param;
 
 	if(!commands.empty()){
 		#ifdef DEBUG
@@ -107,10 +106,69 @@ void* startScanner(void *param){
 	}
 }
 
-void* startMotor(void *param){
+void* runMotor(void *param){
 	Motor* motor = (Motor*)param;
 	while(true){
-		motor->waitForInput();
+
+		sem_wait(&commands_semaphore);
+		pthread_mutex_lock(&signals_mutex);
+
+		if(signals.lastCommand == "m"){
+			if(signals.doorClosing){
+				signals.motorDown = false;
+				signals.motorUp = true;
+				motor->openDoor();
+			}
+
+			else if(signals.doorOpening){
+				signals.motorUp = false;
+				motor->stopDoor();
+			}
+		}
+
+		else if(signals.lastCommand == "i"){
+			if(signals.doorClosing){
+				signals.motorDown = false;
+				signals.motorUp = true;
+				motor->openDoor();
+			}
+		}
+
+		else if(signals.lastCommand == "r"){
+			sleep(1);
+
+			#ifdef DEBUG_V
+			if(signals.interrupted == true){
+				cout << "Door interrupted, direction up? " << signals.doorClosing
+						<< endl;
+			}
+			#endif
+
+			if(signals.doorClosed || (signals.interrupted && signals.doorClosing)){
+				signals.motorUp = true;
+				motor->openDoor();
+				signals.motorUp = false;
+			}
+
+			else if(signals.doorOpen ||
+					(signals.interrupted && signals.doorOpening) ||
+					(signals.motorOvercurrent && signals.doorOpening)){
+				signals.motorOvercurrent = false;
+				signals.motorDown = true;
+				motor->closeDoor();
+				signals.motorDown = false;
+			}
+
+			else{
+				signals.motorDown = false;
+				signals.motorUp = false;
+				signals.interrupted = true;
+				motor->stopDoor();
+			}
+
+			signals.buttonPressed = false;
+		}
+		pthread_mutex_unlock(&signals_mutex);
 	}
 }
 
@@ -132,7 +190,7 @@ int main(int argc, char *argv[]) {
 
 	pthread_create(&input, NULL, startInput, (void *)1);
 	pthread_create(&scanner, NULL, startScanner, (void *)motor);
-	pthread_create(&motorThread, NULL, startMotor, (void*)motor);
+	pthread_create(&motorThread, NULL, runMotor, (void*)motor);
 
 	pthread_join(input, NULL);
 	pthread_join(scanner, NULL);

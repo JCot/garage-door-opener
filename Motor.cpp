@@ -40,68 +40,6 @@ Motor::~Motor() {
 	// TODO Auto-generated destructor stub
 }
 
-void Motor::waitForInput(){
-	sem_wait(&commands_semaphore);
-	pthread_mutex_lock(&signals_mutex);
-
-	if(signals.lastCommand == "m"){
-		if(signals.doorClosing){
-			signals.motorDown = false;
-			signals.motorUp = true;
-			openDoor();
-		}
-
-		else if(signals.doorOpening){
-			signals.motorUp = false;
-			stopDoor();
-		}
-	}
-
-	else if(signals.lastCommand == "i"){
-		if(signals.doorClosing){
-			signals.motorDown = false;
-			signals.motorUp = true;
-			openDoor();
-		}
-	}
-
-	else if(signals.lastCommand == "r"){
-		sleep(1);
-
-		#ifdef DEBUG_V
-		if(signals.interrupted == true){
-			cout << "Door interrupted, direction up? " << signals.doorClosing 
-				<< endl;
-		}
-		#endif
-		
-		if(signals.doorClosed || (signals.interrupted && signals.doorClosing)){
-			signals.motorUp = true;
-			openDoor();
-			signals.motorUp = false;
-		}
-
-		else if(signals.doorOpen || 
-			(signals.interrupted && signals.doorOpening) ||
-			(signals.motorOvercurrent && signals.doorOpening)){
-			signals.motorOvercurrent = false;
-			signals.motorDown = true;
-			closeDoor();
-			signals.motorDown = false;
-		}
-
-		else{
-			signals.motorDown = false;
-			signals.motorUp = false;
-			signals.interrupted = true;
-			stopDoor();
-		}
-
-		signals.buttonPressed = false;
-	}
-	pthread_mutex_unlock(&signals_mutex);
-}
-
 void Motor::openDoor(){
 	signals.doorClosed = false;
 	signals.interrupted = false;
