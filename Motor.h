@@ -10,6 +10,11 @@
 
 #include <signal.h>
 
+/**
+* Motor class simulates the motor opening and closing a garage door.
+* It is represented by a thread performing operations based on input that is 
+* given through the Input class, sent to the Controller class.
+**/
 class Motor {
 public:
 	Motor();

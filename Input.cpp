@@ -16,15 +16,21 @@ using namespace std;
 
 #define SUPPRESS
 
+/**
+* Input constructor.
+**/
 Input::Input() {
-	// TODO Auto-generated constructor stub
-
 }
 
+/**
+* Input destructor.
+**/
 Input::~Input() {
-	// TODO Auto-generated destructor stub
 }
 
+/**
+* Process user input through standard input.
+**/
 void* Input::processInput(){
 	while(true){
 		string input;

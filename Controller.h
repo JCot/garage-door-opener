@@ -8,8 +8,11 @@
 #ifndef CONTROLLER_H_
 #define CONTROLLER_H_
 
+/**
+* Class Controller takes user input from Input class and translate it for 
+* the Motor class to use to perform garage door opener operations.
+**/
 class Controller {
-
 public:
 	Controller();
 	virtual ~Controller();

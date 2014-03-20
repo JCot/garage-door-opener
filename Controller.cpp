@@ -19,16 +19,19 @@
 
 using namespace std;
 
-//extern pthread_mutex_t signals_mutex;
-//extern pthread_cond_t done;
-
 #define DEBUG_
 
+/**
+* Controller constructor.
+**/
 Controller::Controller() {
 	// TODO Auto-generated constructor stub
 
 }
 
+/**
+* Controller destructor.
+**/
 Controller::~Controller() {
 	// TODO Auto-generated destructor stub
 }
